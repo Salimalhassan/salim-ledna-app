@@ -17,10 +17,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SignupSchema } from '@/lib/schemas';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
-import { createUserProfileDocument } from '@/context/AuthContext';
-import type { User } from '@/lib/types';
 
 
 export default function SignupPage() {
@@ -41,48 +37,32 @@ export default function SignupPage() {
   });
 
   async function onSubmit(values: z.infer<typeof SignupSchema>) {
-    setIsLoading(true);
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
-      const firebaseUser = userCredential.user;
+  setIsLoading(true);
+  try {
+    const res = await fetch('/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: values.name,
+        email: values.email,
+        password: values.password,
+        userType: values.userType,
+        primarySpokenLanguage: values.primarySpokenLanguage || '',
+      }),
+    });
 
-      if (firebaseUser) {
-        const userProfileData: Omit<User, 'uid'> = {
-          name: values.name,
-          email: values.email,
-          userType: values.userType,
-          primarySpokenLanguage: values.primarySpokenLanguage || '',
-          avatarUrl: '',
-          location: '',
-          address: '',
-          city: '',
-          country: '',
-          phone: '',
-          isVerified: false,
-        };
-        await createUserProfileDocument(firebaseUser.uid, userProfileData);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Signup failed');
 
-        toast({
-          title: "Account Created",
-          description: "Your account has been successfully created.",
-        });
-        router.push('/dashboard');
-      }
-    } catch (error: any) {
-      console.error("Signup error:", error);
-      let errorMessage = "Failed to create account. Please try again.";
-      if (error.code === 'auth/email-already-in-use') {
-        errorMessage = "This email address is already in use.";
-      }
-      toast({
-        variant: "destructive",
-        title: "Signup Failed",
-        description: errorMessage,
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    toast({ title: 'Account Created', description: 'Your account has been created.' });
+    router.push('/auth/login');
+  } catch (error: any) {
+    const message = error?.message || 'Failed to create account.';
+    toast({ variant: 'destructive', title: 'Signup Failed', description: message });
+  } finally {
+    setIsLoading(false);
   }
+}
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-muted/40 p-4">

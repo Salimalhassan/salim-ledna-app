@@ -6,7 +6,8 @@ import { collection, getCountFromServer } from 'firebase/firestore';
 import type { AdminDashboardStats } from '@/lib/types';
 import { ADMIN_USER_IDS } from '@/config/admin';
 import { getAuth } from 'firebase-admin/auth';
-import { adminApp } from '@/lib/firebase-admin';
+
+import prisma from '@/lib/prisma';
 
 // Helper function to check if the caller is an admin
 // In a real app, you would get the user from the session or a secure token.

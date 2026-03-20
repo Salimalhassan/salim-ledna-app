@@ -2,6 +2,7 @@
 'use server';
 
 import { z } from 'zod';
+import prisma from '@/lib/prisma';
 
 const CreatePaystackTransactionSchema = z.object({
   commodityId: z.string(),

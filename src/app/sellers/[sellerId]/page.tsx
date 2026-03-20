@@ -16,7 +16,7 @@ import { useRouter } from 'next/navigation';
 import type { User, Commodity, Review } from '@/lib/types';
 import { useEffect, useState, useCallback } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+
 import { fetchCommoditiesBySellerId } from '@/actions/commodityActions';
 import { fetchReviewsBySellerId } from '@/actions/reviewActions';
 import { useToast } from '@/hooks/use-toast';

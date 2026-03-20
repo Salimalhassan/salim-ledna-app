@@ -5,6 +5,7 @@ import type * as z from 'zod';
 import type { UserProfileSchema } from '@/lib/schemas';
 import { db } from '@/lib/firebase'; // Import Firestore instance
 import { doc, updateDoc, serverTimestamp, getDoc } from 'firebase/firestore';
+import prisma from '@/lib/prisma';
 
 export interface ProfileActionResult {
   success: boolean;

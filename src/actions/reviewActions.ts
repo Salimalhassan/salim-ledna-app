@@ -5,6 +5,7 @@ import { db } from '@/lib/firebase';
 import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, orderBy } from 'firebase/firestore';
 import type { Review } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
+import prisma from '@/lib/prisma';
 
 export interface ReviewActionResult {
   success: boolean;

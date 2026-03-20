@@ -5,6 +5,7 @@ import { db } from '@/lib/firebase';
 import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, orderBy, doc, updateDoc, getDoc } from 'firebase/firestore';
 import type { Transaction } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
+import prisma from '@/lib/prisma';
 
 export interface TransactionActionResult {
   success: boolean;

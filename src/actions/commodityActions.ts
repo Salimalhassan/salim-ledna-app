@@ -8,6 +8,7 @@ import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, 
 import type { Commodity } from '@/lib/types';
 import { commodityCategories } from '@/data/placeholder'; // To get categoryName
 import { revalidatePath } from 'next/cache';
+import prisma from '@/lib/prisma';
 
 export interface CommodityActionResult {
   success: boolean;

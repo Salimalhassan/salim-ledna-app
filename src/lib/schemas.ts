@@ -1,6 +1,7 @@
 
 import { z } from 'zod';
 
+
 export const LoginSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
@@ -11,7 +12,7 @@ export const SignupSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
   confirmPassword: z.string().min(6, { message: "Password must be at least 6 characters." }),
-  userType: z.enum(['seller', 'buyer'], { required_error: "Please select your role." }),
+  userType: z.enum(['seller', 'buyer','addmin'], { required_error: "Please select your role." }),
   primarySpokenLanguage: z.string().min(2, {message: "Language name should be at least 2 characters."}).optional().or(z.literal('')),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords do not match.",

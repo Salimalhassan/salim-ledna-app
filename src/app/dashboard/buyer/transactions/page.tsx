@@ -1,12 +1,11 @@
 
 'use client';
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, Loader2 } from "lucide-react";
 import { format } from 'date-fns';
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from '@supabase/auth-helpers-react';
 import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -17,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function BuyerTransactionsPage() {
-  const { currentUser, loading: authLoading } = useAuth();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const { toast } = useToast();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -25,10 +24,10 @@ export default function BuyerTransactionsPage() {
 
   useEffect(() => {
     async function loadTransactions() {
-      if (currentUser?.uid && currentUser.userType === 'buyer') {
+      if (session?.user?.id && session.user.userType === 'buyer') {
         setIsLoadingTransactions(true);
         try {
-          const fetchedTransactions = await fetchUserTransactions(currentUser.uid);
+          const fetchedTransactions = await fetchUserTransactions(session.user.id);
           setTransactions(fetchedTransactions);
         } catch (error) {
           console.error("Failed to fetch transactions:", error);
@@ -36,18 +35,18 @@ export default function BuyerTransactionsPage() {
         } finally {
           setIsLoadingTransactions(false);
         }
-      } else if (currentUser && currentUser.userType !== 'buyer') {
-         setIsLoadingTransactions(false);
-      } else if (!currentUser && !authLoading) {
-         setIsLoadingTransactions(false);
+      } else if (session?.user && session.user.userType !== 'buyer') {
+        setIsLoadingTransactions(false);
+      } else if (!session && status !== 'loading') {
+        setIsLoadingTransactions(false);
       }
     }
-     if (!authLoading) {
-        loadTransactions();
+    if (status !== 'loading') {
+      loadTransactions();
     }
-  }, [currentUser, authLoading, toast]);
+  }, [session, status, toast]);
 
-  if (authLoading || (currentUser?.userType === 'buyer' && isLoadingTransactions && transactions.length === 0)) {
+  if (status === 'loading' || (session?.user?.userType === 'buyer' && isLoadingTransactions && transactions.length === 0)) {
     return (
       <div className="container mx-auto py-8 px-4 md:px-6">
         <Skeleton className="h-9 w-1/2 mb-8" />
@@ -74,12 +73,12 @@ export default function BuyerTransactionsPage() {
     );
   }
 
-  if (!currentUser) {
+  if (!session) {
     router.push('/auth/login');
     return null;
   }
 
-  if (currentUser.userType !== 'buyer') {
+  if (session.user.userType !== 'buyer') {
     return (
       <div className="container mx-auto py-8 px-4 md:px-6 text-center">
         <ShoppingCart className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
@@ -95,7 +94,8 @@ export default function BuyerTransactionsPage() {
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
       <h1 className="text-3xl font-bold mb-8 font-headline flex items-center">
-        <ShoppingCart className="mr-3 h-8 w-8 text-primary" /> My Transaction History
+        <ShoppingCart className="mr-3 h-8 w-8 text-primary" />
+        My Transaction History
       </h1>
       <Card className="shadow-xl">
         <CardHeader>
@@ -104,9 +104,9 @@ export default function BuyerTransactionsPage() {
         </CardHeader>
         <CardContent>
           {isLoadingTransactions && transactions.length === 0 ? (
-             <div className="text-center py-12">
-                <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary mb-4" />
-                <p>Loading your transactions...</p>
+            <div className="text-center py-12">
+              <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary mb-4" />
+              <p>Loading your transactions...</p>
             </div>
           ) : transactions.length > 0 ? (
             <Table>
@@ -129,15 +129,13 @@ export default function BuyerTransactionsPage() {
                     <TableCell className="text-right">{txn.quantity} {txn.unit}</TableCell>
                     <TableCell className="text-right">${txn.totalPrice.toFixed(2)}</TableCell>
                     <TableCell className="text-center">
-                      <Badge 
-                        variant={
-                          txn.status === 'Completed' ? 'default' : 
-                          txn.status === 'Pending' ? 'secondary' : 
-                          'destructive'
-                        }
+                      <Badge variant={
+                        txn.status === 'Completed' ? 'default' :
+                          txn.status === 'Pending' ? 'secondary' : 'destructive'
+                      }
                         className={
-                           txn.status === 'Completed' ? 'bg-green-500/80 hover:bg-green-500/70 text-white' :
-                           txn.status === 'Pending' ? 'bg-yellow-500/80 hover:bg-yellow-500/70 text-black' : ''
+                          txn.status === 'Completed' ? 'bg-green-500/80 hover:bg-green-500/70 text-white' :
+                            txn.status === 'Pending' ? 'bg-yellow-500/80 hover:bg-yellow-500/70 text-black' : ''
                         }
                       >
                         {txn.status}

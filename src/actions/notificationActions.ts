@@ -4,6 +4,7 @@
 import { db } from '@/lib/firebase';
 import { doc, updateDoc, writeBatch, collection, query, where, getDocs } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
+import prisma from '@/lib/prisma';
 
 export async function markNotificationAsRead(notificationId: string): Promise<{ success: boolean }> {
   try {

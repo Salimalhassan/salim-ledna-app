@@ -1,9 +1,10 @@
 
-'use server';
+'use client';
 
 import { db } from '@/lib/firebase';
 import { collection, getDocs, query, where, limit, orderBy } from 'firebase/firestore';
 import type { User } from '@/lib/types';
+import prisma from '@/lib/prisma';
 
 function mapFirestoreDocToUser(doc: any): User {
   const data = doc.data();

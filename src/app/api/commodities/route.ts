@@ -1,7 +1,6 @@
-import pool from "@/lib/postgres";
-
-export async function GET() {
-  const result = await pool.query("SELECT * FROM commodities");
-
-  return Response.json(result.rows);
+import prisma from '@/lib/prisma';
+import { NextResponse } from 'next/server';
+export default async function handler(req, res) {
+  const Commodity = await prisma.commodity.findMany();
+  res.status(200).json(Commodity);
 }
